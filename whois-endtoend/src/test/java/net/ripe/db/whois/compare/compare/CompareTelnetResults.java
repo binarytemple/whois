@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare;
+package net.ripe.db.whois.compare.compare;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -7,11 +7,11 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.query.endtoend.compare.telnet.KnownDifferencesPredicate;
-import net.ripe.db.whois.query.endtoend.compare.telnet.TelnetClientUtils;
-import net.ripe.db.whois.query.endtoend.compare.telnet.TelnetInterface;
-import net.ripe.db.whois.query.endtoend.compare.telnet.nrtm.NrtmQueryExecutor;
-import net.ripe.db.whois.query.endtoend.compare.telnet.query.WhoisQueryExecutor;
+import net.ripe.db.whois.compare.compare.telnet.KnownDifferencesPredicate;
+import net.ripe.db.whois.compare.compare.telnet.TelnetClientUtils;
+import net.ripe.db.whois.compare.compare.telnet.TelnetInterface;
+import net.ripe.db.whois.compare.compare.telnet.nrtm.NrtmQueryExecutor;
+import net.ripe.db.whois.compare.compare.telnet.query.WhoisQueryExecutor;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.Matchers;
 import org.slf4j.Logger;
@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static net.ripe.db.whois.query.endtoend.compare.ComparisonPrinter.writeDifferences;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -108,7 +107,7 @@ public class CompareTelnetResults implements CompareResults {
             final Patch patch = DiffUtils.diff(responseObjects1, responseObjects2);
             final List<Delta> deltas = patch.getDeltas();
             if (!deltas.isEmpty()) {
-                writeDifferences(targetDir, queryString, queryExecutor1Result, queryExecutor2Result, deltas);
+                ComparisonPrinter.writeDifferences(targetDir, queryString, queryExecutor1Result, queryExecutor2Result, deltas);
                 failedQueries++;
                 LOGGER.error("Query '{}' has differences", queryString);
             }

@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare.telnet;
+package net.ripe.db.whois.compare.compare.telnet;
 
 import com.google.common.base.Predicate;
 import net.ripe.db.whois.common.domain.ResponseObject;

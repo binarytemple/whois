@@ -1,7 +1,7 @@
 package net.ripe.db.whois.compare.rest;
 
 import net.ripe.db.whois.common.ManualTest;
-import net.ripe.db.whois.query.endtoend.compare.QueryReader;
+import net.ripe.db.whois.compare.compare.QueryReader;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.core.io.ClassPathResource;

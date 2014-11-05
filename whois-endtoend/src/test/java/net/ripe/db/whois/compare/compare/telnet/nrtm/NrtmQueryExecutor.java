@@ -1,10 +1,10 @@
-package net.ripe.db.whois.query.endtoend.compare.telnet.nrtm;
+package net.ripe.db.whois.compare.compare.telnet.nrtm;
 
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.query.endtoend.compare.ComparisonExecutor;
-import net.ripe.db.whois.query.endtoend.compare.telnet.TelnetInterface;
-import net.ripe.db.whois.query.endtoend.compare.telnet.TelnetQueryExecutor;
+import net.ripe.db.whois.compare.compare.telnet.TelnetInterface;
+import net.ripe.db.whois.compare.compare.ComparisonExecutor;
+import net.ripe.db.whois.compare.compare.telnet.TelnetQueryExecutor;
 
 import java.io.IOException;
 import java.net.UnknownHostException;

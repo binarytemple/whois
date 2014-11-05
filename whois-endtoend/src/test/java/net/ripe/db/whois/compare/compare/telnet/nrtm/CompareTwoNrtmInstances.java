@@ -1,10 +1,10 @@
-package net.ripe.db.whois.query.endtoend.compare.telnet.nrtm;
+package net.ripe.db.whois.compare.compare.telnet.nrtm;
 
 import net.ripe.db.whois.common.ManualTest;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.query.endtoend.compare.CompareTelnetResults;
-import net.ripe.db.whois.query.endtoend.compare.telnet.TelnetClientUtils;
-import net.ripe.db.whois.query.endtoend.compare.telnet.TelnetInterface;
+import net.ripe.db.whois.compare.compare.CompareTelnetResults;
+import net.ripe.db.whois.compare.compare.telnet.TelnetClientUtils;
+import net.ripe.db.whois.compare.compare.telnet.TelnetInterface;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare;
+package net.ripe.db.whois.compare.compare;
 
 import com.google.common.base.Charsets;
 import difflib.Chunk;
