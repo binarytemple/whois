@@ -1,21 +1,22 @@
-package net.ripe.db.whois.query.endtoend.compare.query;
+package net.ripe.db.whois.query.endtoend.compare.telnet.query;
 
 import net.ripe.db.whois.common.ManualTest;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
+import net.ripe.db.whois.common.support.QueryLogEntry;
 import net.ripe.db.whois.query.endtoend.compare.CompareTelnetResults;
 import net.ripe.db.whois.query.endtoend.compare.QueryReader;
-import net.ripe.db.whois.query.endtoend.compare.TelnetInterface;
+import net.ripe.db.whois.query.endtoend.compare.telnet.TelnetInterface;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 
 import java.io.File;
 
 @Category(ManualTest.class)
-public class CompareTwoQueryInstancesByComparisonFile {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompareTwoQueryInstancesByComparisonFile.class);
+public class CompareTwoQueryInstancesByQueryLog {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompareTwoQueryInstancesByQueryLog.class);
 
     @Test
     public void test_deployed_versions() throws Exception {
@@ -25,13 +26,13 @@ public class CompareTwoQueryInstancesByComparisonFile {
                 QueryExecutorConfiguration.PRE1,
                 QueryExecutorConfiguration.PRE2,
                 TelnetInterface.WHOIS,
-                new QueryReader(new ClassPathResource("comparison_queries")) {
+                new QueryReader(new FileSystemResource("/export/opt/qrylog")) {
                     @Override
                     protected String getQuery(final String line) {
-                        return line;
+                        return QueryLogEntry.parse(line).getQueryString();
                     }
                 },
-                new File("target/qry/comparison_file"),
-                1).runCompareTest();
+                new File("target/qry/querylog"),
+                2500).runCompareTest();
     }
 }

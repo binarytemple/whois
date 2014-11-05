@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare;
+package net.ripe.db.whois.query.endtoend.compare.telnet;
 
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
 import net.ripe.db.whois.common.support.TelnetWhoisClient;

@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare.nrtm;
+package net.ripe.db.whois.query.endtoend.compare.telnet.nrtm;
 
 import com.google.common.base.Joiner;
 import net.ripe.db.whois.query.endtoend.compare.QueryReader;
