@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare.query;
+package net.ripe.db.whois.query.endtoend.compare;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -6,11 +6,10 @@ import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
-import net.ripe.db.whois.common.support.TelnetWhoisClient;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.query.endtoend.compare.CompareResults;
-import net.ripe.db.whois.query.endtoend.compare.ComparisonExecutor;
-import net.ripe.db.whois.query.endtoend.compare.QueryReader;
+import net.ripe.db.whois.common.support.TelnetWhoisClient;
+import net.ripe.db.whois.query.endtoend.compare.nrtm.NrtmQueryExecutor;
+import net.ripe.db.whois.query.endtoend.compare.query.WhoisQueryExecutor;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.Matchers;
 import org.slf4j.Logger;
@@ -28,34 +27,49 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static net.ripe.db.whois.query.endtoend.compare.ComparisonPrinter.writeDifferences;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class CompareQueryResults implements CompareResults {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompareQueryResults.class);
+public class CompareTelnetResults implements CompareResults {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompareTelnetResults.class);
     private static final Pattern VERSION_PATTERN = Pattern.compile("(?m)^% whois-server-(.*)$");
     private static final Pattern SERIAL_PATTERN = Pattern.compile("(?m)^\\w+:\\d+:X:\\d+-(\\d+)$");
 
     private final QueryExecutorConfiguration config1;
     private final QueryExecutorConfiguration config2;
-    private final QueryExecutor queryExecutor1;
-    private final QueryExecutor queryExecutor2;
+    private final ComparisonExecutor executor1;
+    private final ComparisonExecutor executor2;
     private final ExecutorService executorService;
     private final QueryReader queryReader;
     private final File targetDir;
     private final int logEntries;
 
-    public CompareQueryResults(final QueryExecutorConfiguration config1, final QueryExecutorConfiguration config2, final QueryReader queryReader, final File targetDir, final int logEntries) throws UnknownHostException {
+    public CompareTelnetResults(final QueryExecutorConfiguration config1,
+                                final QueryExecutorConfiguration config2,
+                                final TelnetInterface telnetInterface,
+                                final QueryReader queryReader,
+                                final File targetDir,
+                                final int logEntries) throws UnknownHostException {
         this.config1 = config1;
         this.config2 = config2;
-        this.queryExecutor1 = new QueryExecutor(config1);
-        this.queryExecutor2 = new QueryExecutor(config2);
-        this.executorService = Executors.newFixedThreadPool(2);
-        this.queryReader = queryReader;
         this.targetDir = targetDir;
         this.logEntries = logEntries;
+        this.queryReader = queryReader;
+        this.executorService = Executors.newFixedThreadPool(2);
+
+        switch (telnetInterface) {
+            case NRTM:
+                this.executor1 = new NrtmQueryExecutor(config1);
+                this.executor2 = new NrtmQueryExecutor(config2);
+                break;
+            case WHOIS:
+            default:
+                this.executor1 = new WhoisQueryExecutor(config1);
+                this.executor2 = new WhoisQueryExecutor(config2);
+                break;
+        }
     }
 
     @Override
@@ -85,8 +99,8 @@ public class CompareQueryResults implements CompareResults {
                 LOGGER.info("Compared {} queries", nrQueries);
             }
 
-            final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(queryExecutor1, queryString);
-            final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(queryExecutor2, queryString);
+            final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(executor1, queryString);
+            final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(executor2, queryString);
             final List<ResponseObject> queryExecutor1Result = queryExecutor1Future.get();
             final List<ResponseObject> queryExecutor2Result = queryExecutor2Future.get();
 
@@ -129,6 +143,7 @@ public class CompareQueryResults implements CompareResults {
     private long logSerial(final QueryExecutorConfiguration configuration) throws IOException {
         final TelnetWhoisClient client = new TelnetWhoisClient(configuration.getHost(), configuration.getNrtmPort());
         final String response = client.sendQuery("-q sources");
+
         final Matcher matcher = SERIAL_PATTERN.matcher(response);
         if (!matcher.find()) {
             throw new RuntimeException("serial string not found in whois nrtm response of " + configuration.getIdentifier());

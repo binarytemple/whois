@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare.query;
+package net.ripe.db.whois.query.endtoend.compare;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -7,10 +7,9 @@ import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.io.ByteArrayInput;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.support.ByteArrayContains;
-import net.ripe.db.whois.common.support.TelnetWhoisClient;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
+import net.ripe.db.whois.common.support.TelnetWhoisClient;
 import net.ripe.db.whois.query.domain.MessageObject;
-import net.ripe.db.whois.query.endtoend.compare.ComparisonExecutor;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,19 +18,31 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class QueryExecutor implements ComparisonExecutor {
+public class TelnetQueryExecutor {
+
     private static final byte[] DOUBLE_NEWLINE = new byte[]{'\n', '\n'};
     private static final byte[] STUPID_NEWLINE = new byte[]{'\r'};
 
     private final QueryExecutorConfiguration configuration;
+    private final TelnetInterface telnetInterface;
 
-    public QueryExecutor(final QueryExecutorConfiguration configuration) throws UnknownHostException {
+    public TelnetQueryExecutor(final QueryExecutorConfiguration configuration, TelnetInterface telnetInterface) throws UnknownHostException {
         this.configuration = configuration;
+        this.telnetInterface = telnetInterface;
     }
 
-    @Override
+    private TelnetWhoisClient createTelnetClient(){
+        switch (telnetInterface) {
+            case NRTM:
+                return new TelnetWhoisClient(configuration.getHost(), configuration.getNrtmPort());
+            case WHOIS:
+            default:
+                return new TelnetWhoisClient(configuration.getHost(), configuration.getQueryPort());
+        }
+    }
+
     public List<ResponseObject> getResponse(final String query) throws IOException {
-        final TelnetWhoisClient client = new TelnetWhoisClient(configuration.getHost(), configuration.getQueryPort());
+        final TelnetWhoisClient client = createTelnetClient();
         final String response;
 
         final Stopwatch stopWatch = Stopwatch.createStarted();

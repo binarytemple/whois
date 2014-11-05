@@ -31,7 +31,7 @@ public class NrtmReader extends QueryReader {
 
     @Override
     protected String getQuery(String line) {
-        return null;
+        return line;
     }
 
     public static String generateQueries(long latestSerialId) {

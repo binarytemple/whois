@@ -1,4 +1,4 @@
-package net.ripe.db.whois.query.endtoend.compare.query;
+package net.ripe.db.whois.query.endtoend.compare;
 
 import com.google.common.base.Predicate;
 import net.ripe.db.whois.common.domain.ResponseObject;
