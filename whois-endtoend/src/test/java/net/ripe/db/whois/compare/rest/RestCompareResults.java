@@ -1,9 +1,7 @@
-package net.ripe.db.whois.api.rest.compare;
+package net.ripe.db.whois.compare.rest;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
