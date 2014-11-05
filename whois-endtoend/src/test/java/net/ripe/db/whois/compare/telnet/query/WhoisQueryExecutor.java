@@ -1,19 +1,19 @@
-package net.ripe.db.whois.compare.compare.telnet.nrtm;
+package net.ripe.db.whois.compare.telnet.query;
 
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.compare.compare.telnet.TelnetInterface;
-import net.ripe.db.whois.compare.compare.ComparisonExecutor;
-import net.ripe.db.whois.compare.compare.telnet.TelnetQueryExecutor;
+import net.ripe.db.whois.compare.telnet.TelnetInterface;
+import net.ripe.db.whois.compare.ComparisonExecutor;
+import net.ripe.db.whois.compare.telnet.TelnetQueryExecutor;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
 
-public class NrtmQueryExecutor implements ComparisonExecutor {
+public class WhoisQueryExecutor implements ComparisonExecutor {
     private final TelnetQueryExecutor telnetQueryExecutor;
 
-    public NrtmQueryExecutor(final QueryExecutorConfiguration configuration) throws UnknownHostException {
+    public WhoisQueryExecutor(final QueryExecutorConfiguration configuration) throws UnknownHostException {
         telnetQueryExecutor = new TelnetQueryExecutor(configuration, TelnetInterface.WHOIS);
     }
 

@@ -1,4 +1,4 @@
-package net.ripe.db.whois.compare.compare;
+package net.ripe.db.whois.compare;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

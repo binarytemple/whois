@@ -1,4 +1,4 @@
-package net.ripe.db.whois.compare.compare.telnet;
+package net.ripe.db.whois.compare.telnet;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
