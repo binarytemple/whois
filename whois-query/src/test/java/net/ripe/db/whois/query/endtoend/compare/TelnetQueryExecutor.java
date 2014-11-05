@@ -32,12 +32,10 @@ public class TelnetQueryExecutor {
     }
 
     private TelnetWhoisClient createTelnetClient(){
-        switch (telnetInterface) {
-            case NRTM:
-                return new TelnetWhoisClient(configuration.getHost(), configuration.getNrtmPort());
-            case WHOIS:
-            default:
-                return new TelnetWhoisClient(configuration.getHost(), configuration.getQueryPort());
+        if (telnetInterface == TelnetInterface.NRTM) {
+            return new TelnetWhoisClient(configuration.getHost(), configuration.getNrtmPort());
+        } else {
+            return new TelnetWhoisClient(configuration.getHost(), configuration.getQueryPort());
         }
     }
 

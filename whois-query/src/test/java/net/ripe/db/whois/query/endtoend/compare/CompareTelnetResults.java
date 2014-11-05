@@ -7,7 +7,6 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.common.support.TelnetWhoisClient;
 import net.ripe.db.whois.query.endtoend.compare.nrtm.NrtmQueryExecutor;
 import net.ripe.db.whois.query.endtoend.compare.query.WhoisQueryExecutor;
 import org.apache.commons.lang.StringUtils;
@@ -16,15 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static net.ripe.db.whois.query.endtoend.compare.ComparisonPrinter.writeDifferences;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,8 +30,6 @@ import static org.junit.Assert.assertTrue;
 
 public class CompareTelnetResults implements CompareResults {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompareTelnetResults.class);
-    private static final Pattern VERSION_PATTERN = Pattern.compile("(?m)^% whois-server-(.*)$");
-    private static final Pattern SERIAL_PATTERN = Pattern.compile("(?m)^\\w+:\\d+:X:\\d+-(\\d+)$");
 
     private final QueryExecutorConfiguration config1;
     private final QueryExecutorConfiguration config2;
@@ -79,11 +73,11 @@ public class CompareTelnetResults implements CompareResults {
         assertTrue("Unable to create: " + targetDir.getAbsolutePath(), targetDir.mkdirs());
         assertTrue(new File(targetDir, "0_deltas_go_here.txt").createNewFile());
 
-        logVersion(config1);
-        logVersion(config2);
+        TelnetClientUtils.getVersion(config1);
+        TelnetClientUtils.getVersion(config2);
 
-        Long serial1 = logSerial(config1);
-        Long serial2 = logSerial(config2);
+        Long serial1 = TelnetClientUtils.getLatestSerialId(config1);
+        Long serial2 = TelnetClientUtils.getLatestSerialId(config2);
         assertEquals("Serials must be the same", serial1, serial2);
 
         int nrQueries = 0;
@@ -128,29 +122,5 @@ public class CompareTelnetResults implements CompareResults {
                 return queryExecutor.getResponse(queryString);
             }
         });
-    }
-
-    private void logVersion(final QueryExecutorConfiguration configuration) throws IOException {
-        final TelnetWhoisClient client = new TelnetWhoisClient(configuration.getHost(), configuration.getQueryPort());
-        final String response = client.sendQuery("-q version");
-        final Matcher matcher = VERSION_PATTERN.matcher(response);
-        if (!matcher.find()) {
-            throw new RuntimeException("version string not found in whois query response of " + configuration.getIdentifier());
-        }
-        LOGGER.warn(" ***** Server {} is running version {} ***** ", configuration.getIdentifier(), matcher.group(1));
-    }
-
-    private long logSerial(final QueryExecutorConfiguration configuration) throws IOException {
-        final TelnetWhoisClient client = new TelnetWhoisClient(configuration.getHost(), configuration.getNrtmPort());
-        final String response = client.sendQuery("-q sources");
-
-        final Matcher matcher = SERIAL_PATTERN.matcher(response);
-        if (!matcher.find()) {
-            throw new RuntimeException("serial string not found in whois nrtm response of " + configuration.getIdentifier());
-        }
-
-        final Long serial = Long.parseLong(matcher.group(1));
-        LOGGER.warn(" ***** Server {} is running on DB with serial {} ***** ", configuration.getIdentifier(), serial);
-        return serial;
     }
 }
