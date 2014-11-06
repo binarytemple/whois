@@ -25,7 +25,7 @@ public class NrtmReader extends QueryReader {
             "-g RIPE:2:<LATEST-10>-<LATEST-5>"
     };
 
-    NrtmReader (long latestSerialId) {
+    public NrtmReader(long latestSerialId) {
         super(new ByteArrayResource(generateQueries(latestSerialId).getBytes()));
     }
 

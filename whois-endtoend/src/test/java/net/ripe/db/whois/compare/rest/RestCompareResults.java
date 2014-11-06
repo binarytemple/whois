@@ -7,8 +7,8 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.compare.CompareResults;
-import net.ripe.db.whois.compare.ComparisonConfiguration;
 import net.ripe.db.whois.compare.ComparisonExecutor;
+import net.ripe.db.whois.compare.ComparisonExecutorConfig;
 import net.ripe.db.whois.compare.QueryReader;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -36,8 +36,6 @@ public class RestCompareResults implements CompareResults {
         ALL, XML, JSON
     }
 
-    private final ComparisonConfiguration config1;
-    private final ComparisonConfiguration config2;
     private final RestExecutor restExecutor1;
     private final RestExecutor restExecutor2;
     private final ExecutorService executorService;
@@ -45,12 +43,10 @@ public class RestCompareResults implements CompareResults {
     private final File targetDir;
     private QueryType queryType;
 
-    public RestCompareResults(final RestExecutorConfiguration config1,
-                              final RestExecutorConfiguration config2,
+    public RestCompareResults(final ComparisonExecutorConfig config1,
+                              final ComparisonExecutorConfig config2,
                               final QueryReader queryReader, final File targetDir,
                               final QueryType queryType) throws UnknownHostException {
-        this.config1 = config1;
-        this.config2 = config2;
         this.restExecutor1 = new RestExecutor(config1);
         this.restExecutor2 = new RestExecutor(config2);
         this.executorService = Executors.newFixedThreadPool(2);
@@ -93,11 +89,10 @@ public class RestCompareResults implements CompareResults {
             });
         }
 
-        if (queries.size() == 1) {
-            LOGGER.info("Compare query: {}", queries.get(0));
-        }
-
         for (final String queryString : queries) {
+
+            LOGGER.info("Compare query: {}", queryString);
+
             final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(restExecutor1, queryString);
             final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(restExecutor2, queryString);
 

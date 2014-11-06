@@ -2,9 +2,9 @@ package net.ripe.db.whois.compare.telnet.nrtm;
 
 import net.ripe.db.whois.common.ManualTest;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.compare.telnet.CompareTelnetResults;
+import net.ripe.db.whois.compare.TargetInterface;
 import net.ripe.db.whois.compare.telnet.TelnetClientUtils;
-import net.ripe.db.whois.compare.telnet.TelnetInterface;
+import net.ripe.db.whois.compare.telnet.TelnetCompareFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -32,13 +32,13 @@ public class CompareTwoNrtmInstances {
         QueryExecutorConfiguration config2 = PRE2;
 
         LOGGER.info("Starting NRTM comparison tests");
-        new CompareTelnetResults(
+        new TelnetCompareFactory().createCompareResults(
                 config1,
                 config2,
-                TelnetInterface.NRTM,
                 new NrtmReader(getLatestSerialId(config1, config2)),
                 new File("target/qry/nrtm_comparison"),
-                1).runCompareTest();
+                TargetInterface.NRTM)
+              .runCompareTest();
     }
 
     private long getLatestSerialId(QueryExecutorConfiguration config1, QueryExecutorConfiguration config2) throws IOException {

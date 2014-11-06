@@ -1,5 +1,7 @@
 package net.ripe.db.whois.compare.rest;
 
+import net.ripe.db.whois.compare.ComparisonExecutorConfig;
+
 import javax.ws.rs.core.MediaType;
 
 class RestQueryProperties {
@@ -13,7 +15,7 @@ class RestQueryProperties {
         determineQueryProps(query);
     }
 
-    public int getPortFromConfiguration(final RestExecutorConfiguration config){
+    public int getPortFromConfiguration(final ComparisonExecutorConfig config){
         if (source == Source.TEST){
             return config.getTestPort();
         }

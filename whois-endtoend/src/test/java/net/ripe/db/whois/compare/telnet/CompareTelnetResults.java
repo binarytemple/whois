@@ -6,13 +6,10 @@ import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
-import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
 import net.ripe.db.whois.compare.CompareResults;
 import net.ripe.db.whois.compare.ComparisonExecutor;
 import net.ripe.db.whois.compare.ComparisonPrinter;
 import net.ripe.db.whois.compare.QueryReader;
-import net.ripe.db.whois.compare.telnet.nrtm.NrtmQueryExecutor;
-import net.ripe.db.whois.compare.telnet.query.WhoisQueryExecutor;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.Matchers;
 import org.slf4j.Logger;
@@ -34,39 +31,21 @@ import static org.junit.Assert.assertTrue;
 public class CompareTelnetResults implements CompareResults {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompareTelnetResults.class);
 
-    private final QueryExecutorConfiguration config1;
-    private final QueryExecutorConfiguration config2;
     private final ComparisonExecutor executor1;
     private final ComparisonExecutor executor2;
     private final ExecutorService executorService;
     private final QueryReader queryReader;
     private final File targetDir;
-    private final int logEntries;
 
-    public CompareTelnetResults(final QueryExecutorConfiguration config1,
-                                final QueryExecutorConfiguration config2,
-                                final TelnetInterface telnetInterface,
-                                final QueryReader queryReader,
+    public CompareTelnetResults(final QueryReader queryReader,
                                 final File targetDir,
-                                final int logEntries) throws UnknownHostException {
-        this.config1 = config1;
-        this.config2 = config2;
+                                final ComparisonExecutor executor1,
+                                final ComparisonExecutor executor2) throws UnknownHostException {
         this.targetDir = targetDir;
-        this.logEntries = logEntries;
         this.queryReader = queryReader;
         this.executorService = Executors.newFixedThreadPool(2);
-
-        switch (telnetInterface) {
-            case NRTM:
-                this.executor1 = new NrtmQueryExecutor(config1);
-                this.executor2 = new NrtmQueryExecutor(config2);
-                break;
-            case WHOIS:
-            default:
-                this.executor1 = new WhoisQueryExecutor(config1);
-                this.executor2 = new WhoisQueryExecutor(config2);
-                break;
-        }
+        this.executor1 = executor1;
+        this.executor2 = executor2;
     }
 
     @Override
@@ -76,25 +55,20 @@ public class CompareTelnetResults implements CompareResults {
         assertTrue("Unable to create: " + targetDir.getAbsolutePath(), targetDir.mkdirs());
         assertTrue(new File(targetDir, "0_deltas_go_here.txt").createNewFile());
 
-        TelnetClientUtils.getVersion(config1);
-        TelnetClientUtils.getVersion(config2);
+        TelnetClientUtils.getVersion(executor1.getExecutorConfig());
+        TelnetClientUtils.getVersion(executor2.getExecutorConfig());
 
-        Long serial1 = TelnetClientUtils.getLatestSerialId(config1);
-        Long serial2 = TelnetClientUtils.getLatestSerialId(config2);
+        final Long serial1 = TelnetClientUtils.getLatestSerialId(executor1.getExecutorConfig());
+        final Long serial2 = TelnetClientUtils.getLatestSerialId(executor2.getExecutorConfig());
         assertEquals("Serials must be the same", serial1, serial2);
 
-        int nrQueries = 0;
         int failedQueries = 0;
         for (final String queryString : queryReader.getQueries()) {
             if (StringUtils.isBlank(queryString) || queryString.startsWith("#")) {
                 continue;
             }
 
-            if (logEntries == 1) {
-                LOGGER.info("Compare query: {}", queryString);
-            } else if (++nrQueries % logEntries == 0) {
-                LOGGER.info("Compared {} queries", nrQueries);
-            }
+            LOGGER.info("Compare query: {}", queryString);
 
             final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(executor1, queryString);
             final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(executor2, queryString);
