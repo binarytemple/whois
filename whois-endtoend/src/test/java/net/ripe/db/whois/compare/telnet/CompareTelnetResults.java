@@ -1,4 +1,4 @@
-package net.ripe.db.whois.compare;
+package net.ripe.db.whois.compare.telnet;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -7,9 +7,10 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.compare.telnet.KnownDifferencesPredicate;
-import net.ripe.db.whois.compare.telnet.TelnetClientUtils;
-import net.ripe.db.whois.compare.telnet.TelnetInterface;
+import net.ripe.db.whois.compare.CompareResults;
+import net.ripe.db.whois.compare.ComparisonExecutor;
+import net.ripe.db.whois.compare.ComparisonPrinter;
+import net.ripe.db.whois.compare.QueryReader;
 import net.ripe.db.whois.compare.telnet.nrtm.NrtmQueryExecutor;
 import net.ripe.db.whois.compare.telnet.query.WhoisQueryExecutor;
 import org.apache.commons.lang.StringUtils;

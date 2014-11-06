@@ -3,7 +3,7 @@ package net.ripe.db.whois.compare.telnet.query;
 import net.ripe.db.whois.common.ManualTest;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
 import net.ripe.db.whois.common.support.QueryLogEntry;
-import net.ripe.db.whois.compare.CompareTelnetResults;
+import net.ripe.db.whois.compare.telnet.CompareTelnetResults;
 import net.ripe.db.whois.compare.QueryReader;
 import net.ripe.db.whois.compare.telnet.TelnetInterface;
 import org.junit.Test;

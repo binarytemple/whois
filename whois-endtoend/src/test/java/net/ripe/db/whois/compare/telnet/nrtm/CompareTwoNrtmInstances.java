@@ -2,7 +2,7 @@ package net.ripe.db.whois.compare.telnet.nrtm;
 
 import net.ripe.db.whois.common.ManualTest;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.compare.CompareTelnetResults;
+import net.ripe.db.whois.compare.telnet.CompareTelnetResults;
 import net.ripe.db.whois.compare.telnet.TelnetClientUtils;
 import net.ripe.db.whois.compare.telnet.TelnetInterface;
 import org.apache.commons.io.FileUtils;
