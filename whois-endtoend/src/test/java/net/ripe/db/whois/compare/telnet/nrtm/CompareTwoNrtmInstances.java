@@ -44,7 +44,7 @@ public class CompareTwoNrtmInstances {
     private long getLatestSerialId(QueryExecutorConfiguration config1, QueryExecutorConfiguration config2) throws IOException {
         final long latestSerialId1 = TelnetClientUtils.getLatestSerialId(config1);
         final long latestSerialId2 = TelnetClientUtils.getLatestSerialId(config2);
-        assertThat("Latest Serial Ids must be the same for both servers", latestSerialId1, is(latestSerialId2));
+        assertThat("Latest serial_id must be the same in both servers", latestSerialId1, is(latestSerialId2));
 
         return latestSerialId1;
     }
