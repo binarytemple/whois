@@ -14,7 +14,7 @@ public class NrtmQueryExecutor implements ComparisonExecutor {
     private final TelnetQueryExecutor telnetQueryExecutor;
 
     public NrtmQueryExecutor(final QueryExecutorConfiguration configuration) throws UnknownHostException {
-        telnetQueryExecutor = new TelnetQueryExecutor(configuration, TelnetInterface.WHOIS);
+        telnetQueryExecutor = new TelnetQueryExecutor(configuration, TelnetInterface.NRTM);
     }
 
     @Override
