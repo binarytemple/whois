@@ -1,20 +1,16 @@
 package net.ripe.db.whois.compare.rest;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.compare.CompareResults;
 import net.ripe.db.whois.compare.ComparisonExecutor;
-import net.ripe.db.whois.compare.ComparisonExecutorConfig;
 import net.ripe.db.whois.compare.QueryReader;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -32,27 +28,21 @@ import static org.junit.Assert.assertTrue;
 public class RestCompareResults implements CompareResults {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestCompareResults.class);
 
-    public enum QueryType {
-        ALL, XML, JSON
-    }
-
-    private final RestExecutor restExecutor1;
-    private final RestExecutor restExecutor2;
+    private final ComparisonExecutor executor1;
+    private final ComparisonExecutor executor2;
     private final ExecutorService executorService;
     private final QueryReader queryReader;
     private final File targetDir;
-    private QueryType queryType;
 
-    public RestCompareResults(final ComparisonExecutorConfig config1,
-                              final ComparisonExecutorConfig config2,
-                              final QueryReader queryReader, final File targetDir,
-                              final QueryType queryType) throws UnknownHostException {
-        this.restExecutor1 = new RestExecutor(config1);
-        this.restExecutor2 = new RestExecutor(config2);
-        this.executorService = Executors.newFixedThreadPool(2);
-        this.queryReader = queryReader;
+    public RestCompareResults(final QueryReader queryReader,
+                                final File targetDir,
+                                final ComparisonExecutor executor1,
+                                final ComparisonExecutor executor2) throws UnknownHostException {
         this.targetDir = targetDir;
-        this.queryType = queryType;
+        this.queryReader = queryReader;
+        this.executorService = Executors.newFixedThreadPool(2);
+        this.executor1 = executor1;
+        this.executor2 = executor2;
     }
 
     @Override
@@ -63,38 +53,17 @@ public class RestCompareResults implements CompareResults {
         assertTrue(new File(targetDir, "0_deltas_go_here.txt").createNewFile());
 
         int failedQueries = 0;
-        FluentIterable<String> queries = FluentIterable
-                .from(queryReader.getQueries())
-                .filter(new Predicate<String>() {
-                    @Override
-                    public boolean apply(@Nullable String input) {
-                        return !(input == null || (StringUtils.isBlank(input) || input.startsWith("#")));
-                    }
-                });
 
-        // do only XML or JSON if needed
-        if (queryType == QueryType.XML) {
-            queries = queries.filter(new Predicate<String>() {
-                @Override
-                public boolean apply(@Nullable String input) {
-                    return !(input != null && input.contains(".json"));
-                }
-            });
-        } else if (queryType == QueryType.JSON) {
-            queries = queries.filter(new Predicate<String>() {
-                @Override
-                public boolean apply(@Nullable String input) {
-                    return input != null && input.contains(".json");
-                }
-            });
-        }
+        for (final String queryString : queryReader.getQueries()) {
 
-        for (final String queryString : queries) {
+            if (StringUtils.isBlank(queryString) || queryString.startsWith("#")) {
+                continue;
+            }
 
             LOGGER.info("Compare query: {}", queryString);
 
-            final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(restExecutor1, queryString);
-            final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(restExecutor2, queryString);
+            final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(executor1, queryString);
+            final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(executor2, queryString);
 
             final List<ResponseObject> queryExecutor1Result = queryExecutor1Future.get();
             final List<ResponseObject> queryExecutor2Result = queryExecutor2Future.get();
@@ -108,10 +77,10 @@ public class RestCompareResults implements CompareResults {
             }
         }
 
-        LOGGER.info("Compared {} queries", queries.size());
         assertThat("Number of failed queries", failedQueries, is(0));
     }
 
+    @Override
     public Future<List<ResponseObject>> executeQuery(final ComparisonExecutor comparisonExecutor, final String queryString) {
         return executorService.submit(new Callable<List<ResponseObject>>() {
             @Override

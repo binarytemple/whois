@@ -8,10 +8,8 @@ import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.compare.CompareResults;
 import net.ripe.db.whois.compare.ComparisonExecutor;
-import net.ripe.db.whois.compare.ComparisonPrinter;
 import net.ripe.db.whois.compare.QueryReader;
 import org.apache.commons.lang.StringUtils;
-import org.hamcrest.Matchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +21,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static net.ripe.db.whois.compare.ComparisonPrinter.writeDifferences;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class CompareTelnetResults implements CompareResults {
@@ -63,7 +63,9 @@ public class CompareTelnetResults implements CompareResults {
         assertEquals("Serials must be the same", serial1, serial2);
 
         int failedQueries = 0;
+
         for (final String queryString : queryReader.getQueries()) {
+
             if (StringUtils.isBlank(queryString) || queryString.startsWith("#")) {
                 continue;
             }
@@ -72,6 +74,7 @@ public class CompareTelnetResults implements CompareResults {
 
             final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(executor1, queryString);
             final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(executor2, queryString);
+
             final List<ResponseObject> queryExecutor1Result = queryExecutor1Future.get();
             final List<ResponseObject> queryExecutor2Result = queryExecutor2Future.get();
 
@@ -82,21 +85,21 @@ public class CompareTelnetResults implements CompareResults {
             final Patch patch = DiffUtils.diff(responseObjects1, responseObjects2);
             final List<Delta> deltas = patch.getDeltas();
             if (!deltas.isEmpty()) {
-                ComparisonPrinter.writeDifferences(targetDir, queryString, queryExecutor1Result, queryExecutor2Result, deltas);
+                writeDifferences(targetDir, queryString, queryExecutor1Result, queryExecutor2Result, deltas);
                 failedQueries++;
                 LOGGER.error("Query '{}' has differences", queryString);
             }
         }
 
-        assertThat("Number of failed queries", failedQueries, Matchers.is(0));
+        assertThat("Number of failed queries", failedQueries, is(0));
     }
 
     @Override
-    public Future<List<ResponseObject>> executeQuery(final ComparisonExecutor queryExecutor, final String queryString) {
+    public Future<List<ResponseObject>> executeQuery(final ComparisonExecutor comparisonExecutor, final String queryString) {
         return executorService.submit(new Callable<List<ResponseObject>>() {
             @Override
             public List<ResponseObject> call() throws Exception {
-                return queryExecutor.getResponse(queryString);
+                return comparisonExecutor.getResponse(queryString);
             }
         });
     }

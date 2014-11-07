@@ -2,11 +2,9 @@ package net.ripe.db.whois.compare.rest;
 
 import net.ripe.db.whois.common.ManualTest;
 import net.ripe.db.whois.compare.ComparisonExecutorConfig;
-import net.ripe.db.whois.compare.QueryReader;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
 
@@ -19,16 +17,10 @@ public class RestCompareTwoInstancesByComparisonFile {
         FileUtils.deleteDirectory(new File("target/qry/comparison_rest_file"));
 
         new RestCompareResults(
-                ComparisonExecutorConfig.PRE1,
-                ComparisonExecutorConfig.PRE2,
-                new QueryReader(new ClassPathResource("comparison_rest")) {
-                    @Override
-                    protected String getQuery(final String line) {
-                        return line;
-                    }
-                },
+                new RestQueryReader("comparison_rest", RestQueryReader.RestResponseType.ALL),
                 new File("target/qry/comparison_rest_file"),
-                RestCompareResults.QueryType.ALL)
-                .runCompareTest();
+                new RestExecutor(ComparisonExecutorConfig.PRE1),
+                new RestExecutor(ComparisonExecutorConfig.PRE2))
+                    .runCompareTest();
     }
 }
