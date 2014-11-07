@@ -1,10 +1,10 @@
-package net.ripe.db.whois.compare.telnet.query;
+package net.ripe.db.whois.compare;
 
 import net.ripe.db.whois.common.ManualTest;
-import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.compare.QueryReader;
-import net.ripe.db.whois.compare.TargetInterface;
-import net.ripe.db.whois.compare.telnet.TelnetCompareFactory;
+import net.ripe.db.whois.compare.common.ComparisonExecutorConfig;
+import net.ripe.db.whois.compare.common.QueryReader;
+import net.ripe.db.whois.compare.common.TargetInterface;
+import net.ripe.db.whois.compare.common.ComparisonRunnerFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -15,8 +15,8 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.File;
 
 @Category(ManualTest.class)
-public class CompareTwoQueryInstancesByComparisonFile {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompareTwoQueryInstancesByComparisonFile.class);
+public class CompareTwoQueryInstancesByFile {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompareTwoQueryInstancesByFile.class);
 
     @Test
     public void test_deployed_versions() throws Exception {
@@ -24,9 +24,9 @@ public class CompareTwoQueryInstancesByComparisonFile {
 
         FileUtils.deleteDirectory(new File("target/qry/comparison_file"));
 
-        new TelnetCompareFactory().createCompareResults(
-                QueryExecutorConfiguration.PRE1,
-                QueryExecutorConfiguration.PRE2,
+        new ComparisonRunnerFactory().createCompareResults(
+                ComparisonExecutorConfig.PRE1,
+                ComparisonExecutorConfig.PRE2,
                 new QueryReader(new ClassPathResource("comparison_queries")) {
                     @Override
                     protected String getQuery(final String line) {

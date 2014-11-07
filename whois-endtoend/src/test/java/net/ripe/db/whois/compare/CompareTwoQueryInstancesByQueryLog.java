@@ -1,11 +1,11 @@
-package net.ripe.db.whois.compare.telnet.query;
+package net.ripe.db.whois.compare;
 
 import net.ripe.db.whois.common.ManualTest;
-import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
 import net.ripe.db.whois.common.support.QueryLogEntry;
-import net.ripe.db.whois.compare.QueryReader;
-import net.ripe.db.whois.compare.TargetInterface;
-import net.ripe.db.whois.compare.telnet.TelnetCompareFactory;
+import net.ripe.db.whois.compare.common.ComparisonExecutorConfig;
+import net.ripe.db.whois.compare.common.QueryReader;
+import net.ripe.db.whois.compare.common.TargetInterface;
+import net.ripe.db.whois.compare.common.ComparisonRunnerFactory;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
@@ -22,9 +22,9 @@ public class CompareTwoQueryInstancesByQueryLog {
     public void test_deployed_versions() throws Exception {
         LOGGER.info("Starting Whois port 43 comparison tests");
 
-        new TelnetCompareFactory().createCompareResults(
-                QueryExecutorConfiguration.PRE1,
-                QueryExecutorConfiguration.PRE2,
+        new ComparisonRunnerFactory().createCompareResults(
+                ComparisonExecutorConfig.PRE1,
+                ComparisonExecutorConfig.PRE2,
                 new QueryReader(new FileSystemResource("/export/opt/qrylog")) {
                     @Override
                     protected String getQuery(final String line) {

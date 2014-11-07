@@ -1,10 +1,11 @@
-package net.ripe.db.whois.compare.telnet.nrtm;
+package net.ripe.db.whois.compare;
 
 import net.ripe.db.whois.common.ManualTest;
-import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
-import net.ripe.db.whois.compare.TargetInterface;
+import net.ripe.db.whois.compare.common.ComparisonExecutorConfig;
+import net.ripe.db.whois.compare.common.TargetInterface;
+import net.ripe.db.whois.compare.common.ComparisonRunnerFactory;
 import net.ripe.db.whois.compare.telnet.TelnetClientUtils;
-import net.ripe.db.whois.compare.telnet.TelnetCompareFactory;
+import net.ripe.db.whois.compare.telnet.NrtmReader;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -14,10 +15,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 
-import static net.ripe.db.whois.common.support.QueryExecutorConfiguration.PRE1;
-import static net.ripe.db.whois.common.support.QueryExecutorConfiguration.PRE2;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static net.ripe.db.whois.compare.common.ComparisonExecutorConfig.PRE1;
+import static net.ripe.db.whois.compare.common.ComparisonExecutorConfig.PRE2;
 
 @Category(ManualTest.class)
 public class CompareTwoNrtmInstances {
@@ -28,11 +29,11 @@ public class CompareTwoNrtmInstances {
 
         FileUtils.deleteDirectory(new File("target/qry/nrtm_comparison"));
 
-        QueryExecutorConfiguration config1 = PRE1;
-        QueryExecutorConfiguration config2 = PRE2;
+        ComparisonExecutorConfig config1 = PRE1;
+        ComparisonExecutorConfig config2 = PRE2;
 
         LOGGER.info("Starting NRTM comparison tests");
-        new TelnetCompareFactory().createCompareResults(
+        new ComparisonRunnerFactory().createCompareResults(
                 config1,
                 config2,
                 new NrtmReader(getLatestSerialId(config1, config2)),
@@ -41,7 +42,8 @@ public class CompareTwoNrtmInstances {
               .runCompareTest();
     }
 
-    private long getLatestSerialId(QueryExecutorConfiguration config1, QueryExecutorConfiguration config2) throws IOException {
+    private long getLatestSerialId(final ComparisonExecutorConfig config1, final ComparisonExecutorConfig config2) throws IOException {
+
         final long latestSerialId1 = TelnetClientUtils.getLatestSerialId(config1);
         final long latestSerialId2 = TelnetClientUtils.getLatestSerialId(config2);
         assertThat("Latest serial_id must be the same in both servers", latestSerialId1, is(latestSerialId2));

@@ -1,6 +1,6 @@
 package net.ripe.db.whois.compare.rest;
 
-import net.ripe.db.whois.compare.ComparisonExecutorConfig;
+import net.ripe.db.whois.compare.common.ComparisonExecutorConfig;
 
 import javax.ws.rs.core.MediaType;
 

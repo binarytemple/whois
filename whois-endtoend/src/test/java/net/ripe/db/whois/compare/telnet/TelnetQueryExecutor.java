@@ -9,7 +9,7 @@ import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.support.ByteArrayContains;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
 import net.ripe.db.whois.common.support.TelnetWhoisClient;
-import net.ripe.db.whois.compare.ComparisonExecutor;
+import net.ripe.db.whois.compare.common.ComparisonExecutor;
 import net.ripe.db.whois.query.domain.MessageObject;
 import org.junit.Test;
 
@@ -47,7 +47,7 @@ public class TelnetQueryExecutor implements ComparisonExecutor {
         return parseWhoisResponseIntoRpslObjects(query, response);
     }
 
-    private List<ResponseObject> parseWhoisResponseIntoRpslObjects(final String query, String response) throws IOException {
+    private List<ResponseObject> parseWhoisResponseIntoRpslObjects(final String query, final String response) throws IOException {
         byte[] whoisServerOutput = response.getBytes();
 
         List<ResponseObject> ret = Lists.newArrayList();

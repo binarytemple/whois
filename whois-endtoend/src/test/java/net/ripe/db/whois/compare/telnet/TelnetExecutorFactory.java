@@ -2,8 +2,8 @@ package net.ripe.db.whois.compare.telnet;
 
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;
 import net.ripe.db.whois.common.support.TelnetWhoisClient;
-import net.ripe.db.whois.compare.ComparisonExecutor;
-import net.ripe.db.whois.compare.TargetInterface;
+import net.ripe.db.whois.compare.common.ComparisonExecutor;
+import net.ripe.db.whois.compare.common.TargetInterface;
 
 import java.net.UnknownHostException;
 

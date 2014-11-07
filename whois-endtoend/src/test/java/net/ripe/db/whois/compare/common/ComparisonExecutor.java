@@ -1,4 +1,4 @@
-package net.ripe.db.whois.compare;
+package net.ripe.db.whois.compare.common;
 
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.support.QueryExecutorConfiguration;

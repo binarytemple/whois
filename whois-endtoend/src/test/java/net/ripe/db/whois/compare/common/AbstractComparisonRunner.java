@@ -1,17 +1,15 @@
-package net.ripe.db.whois.compare.rest;
+package net.ripe.db.whois.compare.common;
 
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
-import net.ripe.db.whois.compare.CompareResults;
-import net.ripe.db.whois.compare.ComparisonExecutor;
-import net.ripe.db.whois.compare.QueryReader;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -19,14 +17,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static net.ripe.db.whois.compare.ComparisonPrinter.writeDifferences;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class RestCompareResults implements CompareResults {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestCompareResults.class);
+public abstract class AbstractComparisonRunner implements ComparisonRunner {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractComparisonRunner.class);
 
     private final ComparisonExecutor executor1;
     private final ComparisonExecutor executor2;
@@ -34,10 +31,10 @@ public class RestCompareResults implements CompareResults {
     private final QueryReader queryReader;
     private final File targetDir;
 
-    public RestCompareResults(final QueryReader queryReader,
-                                final File targetDir,
-                                final ComparisonExecutor executor1,
-                                final ComparisonExecutor executor2) throws UnknownHostException {
+    public AbstractComparisonRunner(final QueryReader queryReader,
+                                    final File targetDir,
+                                    final ComparisonExecutor executor1,
+                                    final ComparisonExecutor executor2) throws UnknownHostException {
         this.targetDir = targetDir;
         this.queryReader = queryReader;
         this.executorService = Executors.newFixedThreadPool(2);
@@ -45,12 +42,18 @@ public class RestCompareResults implements CompareResults {
         this.executor2 = executor2;
     }
 
+    protected abstract void preRunHook() throws IOException;
+    protected abstract ComparisonResult filterOutKnownDifferences(final List<ResponseObject> executor1Result,
+                                                                  final List<ResponseObject> executor2Result);
+
     @Override
     public void runCompareTest() throws Exception {
         LOGGER.info("Diffs saved in: {}", targetDir.getAbsolutePath());
         assertFalse("Dir should not exist: " + targetDir.getAbsolutePath(), targetDir.exists());
         assertTrue("Unable to create: " + targetDir.getAbsolutePath(), targetDir.mkdirs());
         assertTrue(new File(targetDir, "0_deltas_go_here.txt").createNewFile());
+
+        preRunHook();
 
         int failedQueries = 0;
 
@@ -62,16 +65,18 @@ public class RestCompareResults implements CompareResults {
 
             LOGGER.info("Compare query: {}", queryString);
 
-            final Future<List<ResponseObject>> queryExecutor1Future = executeQuery(executor1, queryString);
-            final Future<List<ResponseObject>> queryExecutor2Future = executeQuery(executor2, queryString);
+            final Future<List<ResponseObject>> executor1Future = executeQuery(executor1, queryString);
+            final Future<List<ResponseObject>> executor2Future = executeQuery(executor2, queryString);
 
-            final List<ResponseObject> queryExecutor1Result = queryExecutor1Future.get();
-            final List<ResponseObject> queryExecutor2Result = queryExecutor2Future.get();
+            final List<ResponseObject> executor1Result = executor1Future.get();
+            final List<ResponseObject> executor2Result = executor2Future.get();
 
-            final Patch patch = DiffUtils.diff(queryExecutor1Result, queryExecutor2Result);
+            final ComparisonResult result = filterOutKnownDifferences(executor1Result, executor2Result);
+
+            final Patch patch = DiffUtils.diff(result.getList1(), result.getList2());
             final List<Delta> deltas = patch.getDeltas();
             if (!deltas.isEmpty()) {
-                writeDifferences(targetDir, queryString, queryExecutor1Result, queryExecutor2Result, deltas);
+                ComparisonPrinter.writeDifferences(targetDir, queryString, executor1Result, executor2Result, deltas);
                 failedQueries++;
                 LOGGER.error("Query '{}' has differences", queryString);
             }
@@ -79,6 +84,7 @@ public class RestCompareResults implements CompareResults {
 
         assertThat("Number of failed queries", failedQueries, is(0));
     }
+
 
     @Override
     public Future<List<ResponseObject>> executeQuery(final ComparisonExecutor comparisonExecutor, final String queryString) {
@@ -88,5 +94,22 @@ public class RestCompareResults implements CompareResults {
                 return comparisonExecutor.getResponse(queryString);
             }
         });
+    }
+
+    protected class ComparisonResult {
+        final List<ResponseObject> list1, list2;
+
+        public ComparisonResult(final List<ResponseObject> list1, final List<ResponseObject> list2) {
+            this.list1 = list1;
+            this.list2 = list2;
+        }
+
+        public List<ResponseObject> getList1() {
+            return list1;
+        }
+
+        public List<ResponseObject> getList2() {
+            return list2;
+        }
     }
 }

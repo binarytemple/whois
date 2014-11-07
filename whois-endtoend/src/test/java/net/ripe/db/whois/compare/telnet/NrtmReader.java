@@ -1,7 +1,7 @@
-package net.ripe.db.whois.compare.telnet.nrtm;
+package net.ripe.db.whois.compare.telnet;
 
 import com.google.common.base.Joiner;
-import net.ripe.db.whois.compare.QueryReader;
+import net.ripe.db.whois.compare.common.QueryReader;
 import org.springframework.core.io.ByteArrayResource;
 
 public class NrtmReader extends QueryReader {
