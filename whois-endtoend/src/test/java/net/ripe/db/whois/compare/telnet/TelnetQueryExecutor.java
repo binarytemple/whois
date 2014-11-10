@@ -27,7 +27,7 @@ public class TelnetQueryExecutor implements ComparisonExecutor {
 
     private final TelnetWhoisClient telnetWhoisClient;
 
-    public TelnetQueryExecutor(QueryExecutorConfiguration configuration, final TelnetWhoisClient telnetWhoisClient) throws UnknownHostException {
+    public TelnetQueryExecutor(final QueryExecutorConfiguration configuration, final TelnetWhoisClient telnetWhoisClient) throws UnknownHostException {
         this.configuration = configuration;
         this.telnetWhoisClient = telnetWhoisClient;
     }

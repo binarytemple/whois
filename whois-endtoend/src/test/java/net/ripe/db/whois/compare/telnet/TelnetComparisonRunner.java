@@ -8,6 +8,7 @@ import net.ripe.db.whois.compare.common.AbstractComparisonRunner;
 import net.ripe.db.whois.compare.common.ComparisonExecutor;
 import net.ripe.db.whois.compare.common.QueryReader;
 import net.ripe.db.whois.query.domain.MessageObject;
+import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -18,16 +19,17 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class TelnetComparisonRunner extends AbstractComparisonRunner {
-    final ComparisonExecutor executor1;
-    final ComparisonExecutor executor2;
+    private final ComparisonExecutor executor1;
+    private final ComparisonExecutor executor2;
 
     public TelnetComparisonRunner(
             final QueryReader queryReader,
             final File targetDir,
             final ComparisonExecutor executor1,
-            final ComparisonExecutor executor2) throws UnknownHostException {
+            final ComparisonExecutor executor2,
+            final Logger logger) throws UnknownHostException {
 
-        super(queryReader, targetDir, executor1, executor2);
+        super(queryReader, targetDir, executor1, executor2, logger);
         this.executor1 = executor1;
         this.executor2 = executor2;
     }

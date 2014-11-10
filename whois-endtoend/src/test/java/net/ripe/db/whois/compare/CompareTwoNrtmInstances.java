@@ -29,8 +29,8 @@ public class CompareTwoNrtmInstances {
 
         FileUtils.deleteDirectory(new File("target/qry/nrtm_comparison"));
 
-        ComparisonExecutorConfig config1 = PRE1;
-        ComparisonExecutorConfig config2 = PRE2;
+        final ComparisonExecutorConfig config1 = PRE1;
+        final ComparisonExecutorConfig config2 = PRE2;
 
         LOGGER.info("Starting NRTM comparison tests");
         new ComparisonRunnerFactory().createCompareResults(

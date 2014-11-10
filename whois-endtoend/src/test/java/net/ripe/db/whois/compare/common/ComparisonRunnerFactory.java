@@ -4,6 +4,7 @@ import net.ripe.db.whois.compare.rest.RestComparisonRunner;
 import net.ripe.db.whois.compare.rest.RestExecutor;
 import net.ripe.db.whois.compare.telnet.TelnetComparisonRunner;
 import net.ripe.db.whois.compare.telnet.TelnetExecutorFactory;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.UnknownHostException;
@@ -31,15 +32,16 @@ public class ComparisonRunnerFactory {
                     queryReader,
                     targetDir,
                     telnetExecutorFactory.createTelnetExecutor(TargetInterface.NRTM, config1),
-                    telnetExecutorFactory.createTelnetExecutor(TargetInterface.NRTM, config2));
+                    telnetExecutorFactory.createTelnetExecutor(TargetInterface.NRTM, config2),
+                    LoggerFactory.getLogger("NrtmComparisonRunner"));
 
         } else if (targetInterface == TargetInterface.WHOIS) {
             return new TelnetComparisonRunner(
                     queryReader,
                     targetDir,
                     telnetExecutorFactory.createTelnetExecutor(TargetInterface.WHOIS, config1),
-                    telnetExecutorFactory.createTelnetExecutor(TargetInterface.WHOIS, config2));
-
+                    telnetExecutorFactory.createTelnetExecutor(TargetInterface.WHOIS, config2),
+                    LoggerFactory.getLogger("WhoisComparisonRunner"));
         } else {
             throw new UnsupportedOperationException("This executor should only be used for REST/WHOIS/NRTM operations");
         }

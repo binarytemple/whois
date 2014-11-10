@@ -6,7 +6,6 @@ import difflib.Patch;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,23 +22,25 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractComparisonRunner implements ComparisonRunner {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractComparisonRunner.class);
 
     private final ComparisonExecutor executor1;
     private final ComparisonExecutor executor2;
     private final ExecutorService executorService;
     private final QueryReader queryReader;
     private final File targetDir;
+    private final Logger logger;
 
     public AbstractComparisonRunner(final QueryReader queryReader,
                                     final File targetDir,
                                     final ComparisonExecutor executor1,
-                                    final ComparisonExecutor executor2) throws UnknownHostException {
+                                    final ComparisonExecutor executor2,
+                                    final Logger logger) throws UnknownHostException {
         this.targetDir = targetDir;
         this.queryReader = queryReader;
         this.executorService = Executors.newFixedThreadPool(2);
         this.executor1 = executor1;
         this.executor2 = executor2;
+        this.logger = logger;
     }
 
     protected abstract void preRunHook() throws IOException;
@@ -48,7 +49,7 @@ public abstract class AbstractComparisonRunner implements ComparisonRunner {
 
     @Override
     public void runCompareTest() throws Exception {
-        LOGGER.info("Diffs saved in: {}", targetDir.getAbsolutePath());
+        logger.info("Diffs saved in: {}", targetDir.getAbsolutePath());
         assertFalse("Dir should not exist: " + targetDir.getAbsolutePath(), targetDir.exists());
         assertTrue("Unable to create: " + targetDir.getAbsolutePath(), targetDir.mkdirs());
         assertTrue(new File(targetDir, "0_deltas_go_here.txt").createNewFile());
@@ -63,7 +64,7 @@ public abstract class AbstractComparisonRunner implements ComparisonRunner {
                 continue;
             }
 
-            LOGGER.info("Compare query: {}", queryString);
+            logger.info("Compare query: {}", queryString);
 
             final Future<List<ResponseObject>> executor1Future = executeQuery(executor1, queryString);
             final Future<List<ResponseObject>> executor2Future = executeQuery(executor2, queryString);
@@ -78,7 +79,7 @@ public abstract class AbstractComparisonRunner implements ComparisonRunner {
             if (!deltas.isEmpty()) {
                 ComparisonPrinter.writeDifferences(targetDir, queryString, executor1Result, executor2Result, deltas);
                 failedQueries++;
-                LOGGER.error("Query '{}' has differences", queryString);
+                logger.error("Query '{}' has differences", queryString);
             }
         }
 
