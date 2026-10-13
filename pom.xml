@@ -24,7 +24,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring.version>3.2.10.RELEASE</spring.version>
+        <spring.version>6.2.19</spring.version>
         <aspectj.version>1.7.4</aspectj.version>
         <java.version>1.7</java.version>
         <jersey.version>2.11</jersey.version>
@@ -352,7 +352,7 @@
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
-                <version>1.7.3</version>
+                <version>1.23.2</version>
             </dependency>
 
             <!-- Jetty as an embedded server -->
